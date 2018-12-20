@@ -1,0 +1,4 @@
+deliveryman:
+    instances:
+        default:
+            domains: [localhost]

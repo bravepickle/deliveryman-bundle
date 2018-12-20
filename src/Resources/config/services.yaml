@@ -1,0 +1,42 @@
+services:
+    ##### Library services
+
+
+    deliveryman.config_manager:
+        class: Deliveryman\Service\ConfigManager
+        public: false
+        autowire: true
+        arguments:
+            $configs: # TODO: inject somehow configs on extension bundle build
+                -   domains:
+                        - example.com
+
+    deliveryman.http_channel:
+        class: Deliveryman\Channel\HttpChannel
+        public: false
+        autowire: true
+        arguments:
+            $configManager: '@deliveryman.config_manager'
+
+
+    deliveryman.validator:
+        class: Deliveryman\Service\BatchRequestValidator
+        public: false
+        autowire: true
+        arguments:
+            $configManager: '@deliveryman.config_manager'
+
+    deliveryman.normalizer:
+        class: Deliveryman\Normalizer\BatchRequestNormalizer
+        autowire: true
+        autoconfigure: true
+
+    # TODO: sender deliveryman.sender.default - define by config extension on build default sender
+    deliveryman.sender.http:
+        class: Deliveryman\Service\Sender
+        public: true
+        autowire: true
+        arguments:
+            $channel: '@deliveryman.http_channel'
+            $configManager: '@deliveryman.config_manager'
+            $batchRequestValidator: '@deliveryman.validator'
