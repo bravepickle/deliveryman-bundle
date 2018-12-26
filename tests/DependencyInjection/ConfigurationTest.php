@@ -20,7 +20,7 @@ class ConfigurationTest extends TestCase
                 'default' => [
                     'domains' => [],
                     'channels' => [
-                        'http' => [
+                        'http_queue' => [
                             'request_options' => [
                                 'allow_redirects' => false,
                                 'connect_timeout' => 10,
@@ -29,24 +29,35 @@ class ConfigurationTest extends TestCase
                             ],
                             'sender_headers' => [],
                             'receiver_headers' => [],
+                            'expected_status_codes' => [
+                                200,
+                                201,
+                                202,
+                                204,
+                            ],
+                        ],
+                        'http_graph' => [
+                            'request_options' => [
+                                'allow_redirects' => false,
+                                'connect_timeout' => 10,
+                                'timeout' => 30,
+                                'debug' => false,
+                            ],
+                            'sender_headers' => [],
+                            'receiver_headers' => [],
+                            'expected_status_codes' => [
+                                200,
+                                201,
+                                202,
+                                204,
+                            ],
                         ],
                     ],
                     'batch_format' => 'json',
                     'resource_format' => 'json',
                     'on_fail' => 'abort',
                     'config_merge' => 'first',
-                    'expected_status_codes' => [
-                        200,
-                        201,
-                        202,
-                        204,
-                    ],
-                    'methods' => [
-                        0 => 'GET',
-                        1 => 'POST',
-                    ],
                     'silent' => false,
-                    'forward_master_headers' => true,
                 ],
             ],
         ];
