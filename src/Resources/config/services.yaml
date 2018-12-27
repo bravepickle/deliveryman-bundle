@@ -20,6 +20,16 @@ services:
 #        arguments:
 #            $configManager: '@deliveryman.config_manager.abstract'
 
+    deliveryman.channel.http_graph.abstract:
+        class: Deliveryman\Channel\HttpGraphChannel
+        abstract: true
+        public: true
+        autowire: true
+        arguments:
+            $configManager: '@deliveryman.config_manager.abstract'
+        tags:
+            - {name: 'deliveryman.channel', alias: 'http_graph'}
+
 
     deliveryman.validator:
         class: Deliveryman\Service\BatchRequestValidator

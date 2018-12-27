@@ -29,7 +29,8 @@ class DeliverymanBundleTest extends TestCase
 
 
         echo '<pre>';
-        var_dump($containerBuilder->get('deliveryman.config_manager.default')->getConfiguration());
+//        var_dump($containerBuilder->get('deliveryman.config_manager.default')->getConfiguration());
+        var_dump($containerBuilder->get('deliveryman.channel.default.http_graph'));
 //        print_r($configManager->getConfiguration());
         die("\n" . __METHOD__ . ":" . __FILE__ . ":" . __LINE__ . "\n");
         $this->assertInstanceOf(Sender::class, $containerBuilder->get('deliveryman.sender.http'));
