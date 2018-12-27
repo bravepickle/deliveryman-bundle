@@ -28,15 +28,16 @@ services:
         arguments:
             $configManager: '@deliveryman.config_manager.abstract'
         tags:
-            - {name: 'deliveryman.channel', alias: 'http_graph'}
+            - {name: 'deliveryman.channel', channel: 'http_graph'}
 
 
-    deliveryman.validator:
+    deliveryman.validator.abstract:
         class: Deliveryman\Service\BatchRequestValidator
+        abstract: true
         public: false
         autowire: true
         arguments:
-            $configManager: '@deliveryman.config_manager'
+            $configManager: '@deliveryman.config_manager.abstract'
 
     deliveryman.normalizer:
         class: Deliveryman\Normalizer\BatchRequestNormalizer
@@ -44,11 +45,24 @@ services:
         autoconfigure: true
 
     # TODO: sender deliveryman.sender.abstract - define by config extension on build default sender
-#    deliveryman.sender.http:
+#    deliveryman.sendernder.abstract:
 #        class: Deliveryman\Service\Sender
+#        abstract: true
 #        public: true
 #        autowire: true
 #        arguments:
-#            $channel: '@deliveryman.http_channel'
-#            $configManager: '@deliveryman.config_manager'
-#            $batchRequestValidator: '@deliveryman.validator'
+#            $channel: '@deliveryman.channel.abstract'
+#            $configManager: '@deliveryman.config_manager.abstract'
+#            $batchRequestValidator: '@deliveryman.validator.abstract'
+##        tags:
+##            - {name: 'deliveryman.sender', sender: abstract}
+
+    deliveryman.sender.http_graph.abstract:
+#        parent: '@deliveryman.sender.abstract'
+        class: Deliveryman\Service\Sender
+        abstract: true
+        arguments:
+            $channel: '@deliveryman.http_graph.abstract'
+        tags:
+            - {name: 'deliveryman.sender', channel: 'http_graph'}
+
