@@ -61,6 +61,7 @@ services:
 #        parent: '@deliveryman.sender.abstract'
         class: Deliveryman\Service\Sender
         abstract: true
+        public: true
         arguments:
             $channel: '@deliveryman.http_graph.abstract'
         tags:

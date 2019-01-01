@@ -7,6 +7,7 @@
 namespace DeliverymanBundleTest\DependencyInjection;
 
 use Deliveryman\Channel\HttpGraphChannel;
+use Deliveryman\Service\Sender;
 use DeliverymanBundle\DependencyInjection\DeliverymanExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -35,10 +36,14 @@ class DeliverymanExtensionTest extends TestCase
 //        $this->assertTrue($container->getExtensions());
 //        $this->assertTrue($container->hasExtension('deliveryman'));
 //        $this->assertTrue($container->findDefinition('deliveryman.sender.abstract'));
-        $this->assertTrue($container->getServiceIds());
 //        $this->assertTrue($container->findDefinition('deliveryman.validator.default'));
 //        $this->assertTrue($container->hasDefinition('deliveryman.validator.default'));
 //        $this->assertTrue($container->get('deliveryman.validator.default'));
+
+//        $this->assertTrue($container->getServiceIds());
+        $this->assertTrue($container->has('deliveryman.sender.http_graph.default'));
+        $this->assertInstanceOf(Sender::class, $container->get('deliveryman.sender.http_graph.default'));
+
 
         $this->assertTrue($container->has('deliveryman.channel.http_graph.default'));
         $this->assertInstanceOf(HttpGraphChannel::class, $container->get('deliveryman.channel.http_graph.default'));

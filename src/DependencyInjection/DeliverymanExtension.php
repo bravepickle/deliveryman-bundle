@@ -8,9 +8,6 @@ namespace DeliverymanBundle\DependencyInjection;
 
 
 use Deliveryman\Channel\ChannelInterface;
-use Deliveryman\Channel\HttpGraphChannel;
-use Deliveryman\Channel\HttpQueueChannel;
-use Deliveryman\Service\ConfigManager;
 use Deliveryman\Service\Sender;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -104,7 +101,7 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
     {
         foreach ($cfgInstances as $name => $config) {
             $definition = new ChildDefinition('deliveryman.validator.abstract');
-            $definition->setArgument(0, [$config]);
+            $definition->setArgument(0, new Reference(self::SVC_CFG_MANAGER_PREFIX . $name));
             $container->setDefinition(self::SVC_VALIDATOR_PREFIX . $name, $definition);
         }
     }
@@ -160,9 +157,15 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
                 foreach ($cfgInstances as $cfgName => $config) {
                     $definition = new ChildDefinition($id);
 //                $definition->setArgument(0, new Reference(self::SVC_SENDER_PREFIX . $cfgName));
+                $definition->setArgument(0, new Reference(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName));
+                $definition->setArgument(1, new Reference(self::SVC_CFG_MANAGER_PREFIX . $cfgName));
+                $definition->setArgument(2, new Reference(self::SVC_VALIDATOR_PREFIX . $cfgName));
+//                $definition->setArgument('$channel', new Reference(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName));
 
 
-                    $definition->setProperty('channel', new Reference(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName));
+//                    var_dump(self::TAG_SENDER . '.' . $tag['channel'] . '.' . $cfgName);
+//                    die("\n" . __METHOD__ . ":" . __FILE__ . ":" . __LINE__ . "\n");
+//                    $definition->setProperty('channel', new Reference(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName));
                     $container->setDefinition(self::TAG_SENDER . '.' . $tag['channel'] . '.' . $cfgName, $definition);
                 }
             }
