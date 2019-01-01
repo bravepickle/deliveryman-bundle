@@ -6,7 +6,6 @@
 
 namespace DeliverymanBundle;
 
-use DeliverymanBundle\DependencyInjection\CompilerPass\AddValidationRulesPass;
 use DeliverymanBundle\DependencyInjection\DeliverymanExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -15,12 +14,6 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class DeliverymanBundle extends Bundle
 {
-//    public function getContainerExtension()
-//    {
-//        return new DeliverymanExtension();
-//    }
-
-
     /**
      * @param ContainerBuilder $container
      * @throws \Exception
@@ -36,7 +29,5 @@ class DeliverymanBundle extends Bundle
         );
 
         $loader->load('config.yaml');
-//
-//        $container->addCompilerPass(new AddValidationRulesPass());
     }
 }

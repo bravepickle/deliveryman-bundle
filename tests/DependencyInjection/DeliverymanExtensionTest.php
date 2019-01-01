@@ -6,8 +6,10 @@
 
 namespace DeliverymanBundleTest\DependencyInjection;
 
+use Deliveryman\Channel\ChannelInterface;
 use Deliveryman\Channel\HttpGraphChannel;
 use Deliveryman\Service\Sender;
+use Deliveryman\Service\SenderInterface;
 use DeliverymanBundle\DependencyInjection\DeliverymanExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,28 +29,24 @@ class DeliverymanExtensionTest extends TestCase
         $this->assertEquals('deliveryman', $extension->getAlias());
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testLoad()
     {
         $container = $this->getContainer([
             ['instances' => ['default' => ['domains' => ['localhost']]]]
         ]);
 
-//        $this->assertTrue($container->getExtensions());
-//        $this->assertTrue($container->hasExtension('deliveryman'));
-//        $this->assertTrue($container->findDefinition('deliveryman.sender.abstract'));
-//        $this->assertTrue($container->findDefinition('deliveryman.validator.default'));
-//        $this->assertTrue($container->hasDefinition('deliveryman.validator.default'));
-//        $this->assertTrue($container->get('deliveryman.validator.default'));
-
-//        $this->assertTrue($container->getServiceIds());
         $this->assertTrue($container->has('deliveryman.sender.http_graph.default'));
         $this->assertInstanceOf(Sender::class, $container->get('deliveryman.sender.http_graph.default'));
+        $this->assertInstanceOf(SenderInterface::class, $container->get('deliveryman.sender.http_graph.default'));
 
 
         $this->assertTrue($container->has('deliveryman.channel.http_graph.default'));
         $this->assertInstanceOf(HttpGraphChannel::class, $container->get('deliveryman.channel.http_graph.default'));
+        $this->assertInstanceOf(ChannelInterface::class, $container->get('deliveryman.channel.http_graph.default'));
         $this->assertTrue($container->hasDefinition('deliveryman.channel.http_graph.default'));
-//        $this->assertTrue($container->getDefinition('deliveryman.channel.default.http_graph'));
     }
 
     public function testGetNamespace()
@@ -57,6 +55,12 @@ class DeliverymanExtensionTest extends TestCase
         $this->assertEquals('http://www.example.com/schema/deliveryman', $extension->getNamespace());
     }
 
+    /**
+     * @param array $configs
+     * @param array $thirdPartyDefinitions
+     * @return ContainerBuilder
+     * @throws \Exception
+     */
     protected function getContainer(array $configs = [], array $thirdPartyDefinitions = [])
     {
         $container = new ContainerBuilder();
@@ -64,15 +68,8 @@ class DeliverymanExtensionTest extends TestCase
             $container->setDefinition($id, $definition);
         }
 
-//        $container->getCompilerPassConfig()->setOptimizationPasses(array());
-//        $container->getCompilerPassConfig()->setRemovingPasses(array());
-//        $container->addCompilerPass(new LoggerChannelPass());
-
         $loader = new DeliverymanExtension();
         $loader->load($configs, $container);
-//        $container->registerExtension($loader);
-//
-//        $container->loadFromExtension($loader->getAlias(), $configs);
         $container->compile();
 
         return $container;

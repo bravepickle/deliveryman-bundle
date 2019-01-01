@@ -13,7 +13,7 @@ services:
 #                        - example.com
 
     deliveryman.channel.abstract:
-        class: Deliveryman\Channel\AbstractChannel
+        class: Deliveryman\Channel\ChannelInterface
         abstract: true
         public: true
         autowire: true
@@ -45,25 +45,30 @@ services:
         autoconfigure: true
 
     # TODO: sender deliveryman.sender.abstract - define by config extension on build default sender
-#    deliveryman.sendernder.abstract:
-#        class: Deliveryman\Service\Sender
-#        abstract: true
+    deliveryman.sender.abstract:
+        class: Deliveryman\Service\SenderInterface
+        abstract: true
 #        public: true
 #        autowire: true
 #        arguments:
-#            $channel: '@deliveryman.channel.abstract'
+#            $channel: '@deliveryman.http_graph.abstract'
 #            $configManager: '@deliveryman.config_manager.abstract'
 #            $batchRequestValidator: '@deliveryman.validator.abstract'
-##        tags:
-##            - {name: 'deliveryman.sender', sender: abstract}
+#        tags:
+#            - {name: 'deliveryman.sender', sender: abstract}
 
     deliveryman.sender.http_graph.abstract:
 #        parent: '@deliveryman.sender.abstract'
         class: Deliveryman\Service\Sender
         abstract: true
-        public: true
+        autowire: true
+#        public: true
+#        arguments:
+#            $channel: '@deliveryman.http_graph.abstract'
         arguments:
             $channel: '@deliveryman.http_graph.abstract'
+            $configManager: '@deliveryman.config_manager.abstract'
+            $batchRequestValidator: '@deliveryman.validator.abstract'
         tags:
             - {name: 'deliveryman.sender', channel: 'http_graph'}
 

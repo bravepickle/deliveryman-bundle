@@ -23,6 +23,8 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
     const SVC_CFG_MANAGER_PREFIX = 'deliveryman.config_manager.';
     const SVC_SENDER_PREFIX = 'deliveryman.sender.';
     const SVC_VALIDATOR_PREFIX = 'deliveryman.validator.';
+    const SVC_CHANNEL_PREFIX = 'deliveryman.channel.';
+
     const TAG_CHANNEL = 'deliveryman.channel';
     const TAG_SENDER = 'deliveryman.sender';
 
@@ -128,7 +130,7 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
                         throw new InvalidArgumentException('Alias for channel tags must be set');
                     }
 
-                    $container->setDefinition(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName, $definition);
+                    $container->setDefinition(self::SVC_CHANNEL_PREFIX . $tag['channel'] . '.' . $cfgName, $definition);
                 }
             }
         }
@@ -156,17 +158,12 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
 
                 foreach ($cfgInstances as $cfgName => $config) {
                     $definition = new ChildDefinition($id);
-//                $definition->setArgument(0, new Reference(self::SVC_SENDER_PREFIX . $cfgName));
-                $definition->setArgument(0, new Reference(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName));
-                $definition->setArgument(1, new Reference(self::SVC_CFG_MANAGER_PREFIX . $cfgName));
-                $definition->setArgument(2, new Reference(self::SVC_VALIDATOR_PREFIX . $cfgName));
-//                $definition->setArgument('$channel', new Reference(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName));
+                    $definition->setPublic(true);
+                    $definition->setArgument(0, new Reference(self::SVC_CHANNEL_PREFIX . $tag['channel'] . '.' . $cfgName));
+                    $definition->setArgument(1, new Reference(self::SVC_CFG_MANAGER_PREFIX . $cfgName));
+                    $definition->setArgument(2, new Reference(self::SVC_VALIDATOR_PREFIX . $cfgName));
 
-
-//                    var_dump(self::TAG_SENDER . '.' . $tag['channel'] . '.' . $cfgName);
-//                    die("\n" . __METHOD__ . ":" . __FILE__ . ":" . __LINE__ . "\n");
-//                    $definition->setProperty('channel', new Reference(self::TAG_CHANNEL . '.' . $tag['channel'] . '.' . $cfgName));
-                    $container->setDefinition(self::TAG_SENDER . '.' . $tag['channel'] . '.' . $cfgName, $definition);
+                    $container->setDefinition(self::SVC_SENDER_PREFIX . $tag['channel'] . '.' . $cfgName, $definition);
                 }
             }
         }
