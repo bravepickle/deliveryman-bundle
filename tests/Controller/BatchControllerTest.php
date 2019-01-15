@@ -47,6 +47,20 @@ class BatchControllerTest extends TestCase
     }
 
     /**
+     * Test setting config name for controller
+     */
+    public function testConfigNameSet()
+    {
+        $controller = new BatchController();
+
+        $this->assertEquals('default', $controller->getConfigName()); // default value
+
+        $configName = 'test_config_name';
+        $controller->setConfigName($configName);
+        $this->assertEquals($configName, $controller->getConfigName());
+    }
+
+    /**
      * @throws \Deliveryman\Exception\SendingException
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \Exception

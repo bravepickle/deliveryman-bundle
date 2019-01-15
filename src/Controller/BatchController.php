@@ -25,12 +25,26 @@ class BatchController implements ContainerAwareInterface
     use ContainerAwareTrait;
 
     /**
+     * Name of instance from configuration to use
+     * @var string
+     */
+    protected $configName = 'default';
+
+    /**
+     * @param string $configName
+     */
+    public function setConfigName(string $configName): void
+    {
+        $this->configName = $configName;
+    }
+
+    /**
      * Return name of config to check for sender
      * @return string
      */
-    protected function getConfigName()
+    public function getConfigName()
     {
-        return 'default';
+        return $this->configName;
     }
 
     /**
