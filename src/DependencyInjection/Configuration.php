@@ -19,12 +19,10 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder('deliveryman');
-        if (method_exists($treeBuilder, 'getRootNode')) {
-            $rootNode = $treeBuilder->getRootNode();
-        } else {
-            // is workaround to support symfony/config 4.1 and older
-            $rootNode = $treeBuilder->root('deliveryman');
-        }
+
+        // is workaround to support symfony/config 4.1 and older
+        $rootNode = (method_exists($treeBuilder, 'getRootNode')) ? $treeBuilder->getRootNode() :
+            $treeBuilder->root('deliveryman');
 
         $nodeBuilder = $rootNode->children();
 

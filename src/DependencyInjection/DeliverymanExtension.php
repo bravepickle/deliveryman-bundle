@@ -8,7 +8,8 @@ namespace DeliverymanBundle\DependencyInjection;
 
 
 use Deliveryman\Channel\ChannelInterface;
-use Deliveryman\Service\Sender;
+use Deliveryman\Normalizer\ChannelNormalizerInterface;
+use Deliveryman\Service\SenderInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,8 +25,12 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
     const SVC_SENDER_PREFIX = 'deliveryman.sender.';
     const SVC_VALIDATOR_PREFIX = 'deliveryman.validator.';
     const SVC_CHANNEL_PREFIX = 'deliveryman.channel.';
+    const SVC_CHANNEL_NORMALIZER_PREFIX = 'deliveryman.channel_normalizer.';
+
+    const SVC_BATCH_REQUEST_NORMALIZER = 'deliveryman.normalizer';
 
     const TAG_CHANNEL = 'deliveryman.channel';
+    const TAG_CHANNEL_NORMALIZER = 'deliveryman.channel_normalizer';
     const TAG_SENDER = 'deliveryman.sender';
 
     /**
@@ -44,6 +49,7 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
         $this->addConfigManagers($container, $cfgInstances);
         $this->addValidators($container, $cfgInstances);
         $this->addChannels($container, $cfgInstances);
+        $this->addChannelNormalizers($container);
         $this->addSenders($container, $cfgInstances);
     }
 
@@ -127,7 +133,7 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
 
                 foreach ($tags as $tag) {
                     if (!isset($tag['channel'])) {
-                        throw new InvalidArgumentException('Alias for channel tags must be set');
+                        throw new InvalidArgumentException('Alias for channel tags must be set.');
                     }
 
                     $container->setDefinition(self::SVC_CHANNEL_PREFIX . $tag['channel'] . '.' . $cfgName, $definition);
@@ -147,13 +153,12 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
             $class = $container->getParameterBag()->resolveValue($def->getClass());
 
             foreach ($tags as $tag) {
-                // TODO: add sender interface instead for abstract classes
                 if (!isset($tag['channel'])) {
-                    throw new InvalidArgumentException('Sender tags for channel must be set');
+                    throw new InvalidArgumentException('Sender tags for channel must be set.');
                 }
 
-                if (!is_subclass_of($class, Sender::class) && $class !== Sender::class) {
-                    throw new InvalidArgumentException(sprintf('Service "%s" must instance of class "%s".', $id, Sender::class));
+                if (!is_subclass_of($class, SenderInterface::class)) {
+                    throw new InvalidArgumentException(sprintf('Service "%s" must implement interface "%s".', $id, SenderInterface::class));
                 }
 
                 foreach ($cfgInstances as $cfgName => $config) {
@@ -166,6 +171,26 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
                     $container->setDefinition(self::SVC_SENDER_PREFIX . $tag['channel'] . '.' . $cfgName, $definition);
                 }
             }
+        }
+    }
+
+    /**
+     * Add channel normalizers for normalizer
+     * @param ContainerBuilder $container
+     */
+    protected function addChannelNormalizers(ContainerBuilder $container)
+    {
+        $batchNormalizer = $container->getDefinition(self::SVC_BATCH_REQUEST_NORMALIZER);
+        foreach ($container->findTaggedServiceIds(self::TAG_CHANNEL_NORMALIZER) as $id => $tags) {
+            $def = $container->getDefinition($id);
+            $class = $container->getParameterBag()->resolveValue($def->getClass());
+            if (!is_subclass_of($class, ChannelNormalizerInterface::class)) {
+                throw new InvalidArgumentException(sprintf('Service "%s" must implement interface "%s".', $id, ChannelNormalizerInterface::class));
+            }
+
+            $definition = new ChildDefinition($id);
+            $definition->setClass($class);
+            $batchNormalizer->addMethodCall('addChannelNormalizer', [$definition]);
         }
     }
 

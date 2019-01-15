@@ -6,19 +6,12 @@ services:
         class: Deliveryman\Service\ConfigManager
         abstract: true
         public: false
-        autowire: true
-#        arguments:
-#            $configs: # TODO: inject somehow configs on extension bundle build
-#                -   domains:
-#                        - example.com
 
     deliveryman.channel.abstract:
         class: Deliveryman\Channel\ChannelInterface
         abstract: true
         public: true
         autowire: true
-#        arguments:
-#            $configManager: '@deliveryman.config_manager.abstract'
 
     deliveryman.channel.http_graph.abstract:
         class: Deliveryman\Channel\HttpGraphChannel
@@ -29,7 +22,6 @@ services:
             $configManager: '@deliveryman.config_manager.abstract'
         tags:
             - {name: 'deliveryman.channel', channel: 'http_graph'}
-
 
     deliveryman.validator.abstract:
         class: Deliveryman\Service\BatchRequestValidator
@@ -43,28 +35,18 @@ services:
         class: Deliveryman\Normalizer\BatchRequestNormalizer
         autowire: true
         autoconfigure: true
+        public: true
+        tags: [serializer.normalizer]
 
     # TODO: sender deliveryman.sender.abstract - define by config extension on build default sender
     deliveryman.sender.abstract:
         class: Deliveryman\Service\SenderInterface
         abstract: true
-#        public: true
-#        autowire: true
-#        arguments:
-#            $channel: '@deliveryman.http_graph.abstract'
-#            $configManager: '@deliveryman.config_manager.abstract'
-#            $batchRequestValidator: '@deliveryman.validator.abstract'
-#        tags:
-#            - {name: 'deliveryman.sender', sender: abstract}
 
     deliveryman.sender.http_graph.abstract:
-#        parent: '@deliveryman.sender.abstract'
         class: Deliveryman\Service\Sender
         abstract: true
         autowire: true
-#        public: true
-#        arguments:
-#            $channel: '@deliveryman.http_graph.abstract'
         arguments:
             $channel: '@deliveryman.http_graph.abstract'
             $configManager: '@deliveryman.config_manager.abstract'
@@ -72,3 +54,14 @@ services:
         tags:
             - {name: 'deliveryman.sender', channel: 'http_graph'}
 
+    deliveryman.channel_normalizer.abstract:
+        class: Deliveryman\Normalizer\ChannelNormalizerInterface
+        abstract: true
+
+    deliveryman.channel_normalizer.http_graph:
+        parent: deliveryman.channel_normalizer.abstract
+        class: Deliveryman\Normalizer\HttpGraphChannelNormalizer
+        autowire: true
+        arguments: ['@serializer']
+        tags:
+            - {name: 'deliveryman.channel_normalizer'}
