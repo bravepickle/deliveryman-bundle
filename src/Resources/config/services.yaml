@@ -38,13 +38,12 @@ services:
         public: true
         tags: [serializer.normalizer]
 
-    # TODO: sender deliveryman.sender.abstract - define by config extension on build default sender
-    deliveryman.sender.abstract:
-        class: Deliveryman\Service\SenderInterface
+    deliveryman.handler.abstract:
+        class: Deliveryman\Service\BatchRequestHandlerInterface
         abstract: true
 
-    deliveryman.sender.http_graph.abstract:
-        class: Deliveryman\Service\Sender
+    deliveryman.handler.http_graph.abstract:
+        class: Deliveryman\Service\BatchRequestHandler
         abstract: true
         autowire: true
         arguments:
@@ -52,7 +51,7 @@ services:
             $configManager: '@deliveryman.config_manager.abstract'
             $batchRequestValidator: '@deliveryman.validator.abstract'
         tags:
-            - {name: 'deliveryman.sender', channel: 'http_graph'}
+            - {name: 'deliveryman.handler', channel: 'http_graph'}
 
     deliveryman.channel_normalizer.abstract:
         class: Deliveryman\Normalizer\ChannelNormalizerInterface

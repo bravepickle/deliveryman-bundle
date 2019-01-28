@@ -9,8 +9,8 @@ namespace DeliverymanBundleTest\DependencyInjection;
 use Deliveryman\Channel\ChannelInterface;
 use Deliveryman\Channel\HttpGraphChannel;
 use Deliveryman\Normalizer\BatchRequestNormalizer;
-use Deliveryman\Service\Sender;
-use Deliveryman\Service\SenderInterface;
+use Deliveryman\Service\BatchRequestHandler;
+use Deliveryman\Service\BatchRequestHandlerInterface;
 use DeliverymanBundle\DependencyInjection\DeliverymanExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -48,9 +48,9 @@ class DeliverymanExtensionTest extends TestCase
             ['instances' => ['default' => ['domains' => ['localhost']]]]
         ]);
 
-        $this->assertTrue($container->has('deliveryman.sender.http_graph.default'));
-        $this->assertInstanceOf(Sender::class, $container->get('deliveryman.sender.http_graph.default'));
-        $this->assertInstanceOf(SenderInterface::class, $container->get('deliveryman.sender.http_graph.default'));
+        $this->assertTrue($container->has('deliveryman.handler.http_graph.default'));
+        $this->assertInstanceOf(BatchRequestHandler::class, $container->get('deliveryman.handler.http_graph.default'));
+        $this->assertInstanceOf(BatchRequestHandlerInterface::class, $container->get('deliveryman.handler.http_graph.default'));
 
 
         $this->assertTrue($container->has('deliveryman.channel.http_graph.default'));
@@ -121,12 +121,12 @@ class DeliverymanExtensionTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testInvalidSenderTag()
+    public function testInvalidHandlerTag()
     {
         $this->expectExceptionMessage('Sender tags for channel must be set');
 
-        $definition = new Definition(Sender::class);
-        $definition->addTag('deliveryman.sender');
+        $definition = new Definition(BatchRequestHandler::class);
+        $definition->addTag('deliveryman.handler');
 
         $this->getContainer([
             ['instances' => ['default' => ['domains' => ['localhost']]]]
@@ -136,12 +136,12 @@ class DeliverymanExtensionTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testInvalidSenderClass()
+    public function testInvalidHandlerClass()
     {
-        $this->expectExceptionMessage('Service "badSender" must implement interface "Deliveryman\Service\SenderInterface".');
+        $this->expectExceptionMessage('Service "badSender" must implement interface "Deliveryman\Service\BatchRequestHandlerInterface".');
 
         $definition = new Definition(\stdClass::class);
-        $definition->addTag('deliveryman.sender', ['channel' => 'http_graph']);
+        $definition->addTag('deliveryman.handler', ['channel' => 'http_graph']);
 
         $this->getContainer([
             ['instances' => ['default' => ['domains' => ['localhost']]]]

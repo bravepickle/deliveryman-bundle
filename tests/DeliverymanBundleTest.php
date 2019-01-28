@@ -35,7 +35,7 @@ class DeliverymanBundleTest extends TestCase
 
         $containerBuilder->compile();
 
-        $this->assertTrue($containerBuilder->has('deliveryman.sender.http_graph.default'));
+        $this->assertTrue($containerBuilder->has('deliveryman.handler.http_graph.default'));
         $this->assertTrue($containerBuilder->has('deliveryman.channel.http_graph.default'));
     }
 

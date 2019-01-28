@@ -9,7 +9,7 @@ namespace DeliverymanBundle\DependencyInjection;
 
 use Deliveryman\Channel\ChannelInterface;
 use Deliveryman\Normalizer\ChannelNormalizerInterface;
-use Deliveryman\Service\SenderInterface;
+use Deliveryman\Service\BatchRequestHandlerInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -22,7 +22,7 @@ use Symfony\Component\DependencyInjection\Reference;
 class DeliverymanExtension extends Extension implements ExtensionInterface
 {
     const SVC_CFG_MANAGER_PREFIX = 'deliveryman.config_manager.';
-    const SVC_SENDER_PREFIX = 'deliveryman.sender.';
+    const SVC_HANDLER_PREFIX = 'deliveryman.handler.';
     const SVC_VALIDATOR_PREFIX = 'deliveryman.validator.';
     const SVC_CHANNEL_PREFIX = 'deliveryman.channel.';
     const SVC_CHANNEL_NORMALIZER_PREFIX = 'deliveryman.channel_normalizer.';
@@ -31,7 +31,7 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
 
     const TAG_CHANNEL = 'deliveryman.channel';
     const TAG_CHANNEL_NORMALIZER = 'deliveryman.channel_normalizer';
-    const TAG_SENDER = 'deliveryman.sender';
+    const TAG_HANDLER = 'deliveryman.handler';
 
     /**
      * @inheritdoc
@@ -50,7 +50,7 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
         $this->addValidators($container, $cfgInstances);
         $this->addChannels($container, $cfgInstances);
         $this->addChannelNormalizers($container);
-        $this->addSenders($container, $cfgInstances);
+        $this->addHandlers($container, $cfgInstances);
     }
 
     /**
@@ -146,9 +146,9 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
      * @param ContainerBuilder $container
      * @param array $cfgInstances
      */
-    protected function addSenders(ContainerBuilder $container, array $cfgInstances): void
+    protected function addHandlers(ContainerBuilder $container, array $cfgInstances): void
     {
-        foreach ($container->findTaggedServiceIds(self::TAG_SENDER) as $id => $tags) {
+        foreach ($container->findTaggedServiceIds(self::TAG_HANDLER) as $id => $tags) {
             $def = $container->getDefinition($id);
             $class = $container->getParameterBag()->resolveValue($def->getClass());
 
@@ -157,8 +157,12 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
                     throw new InvalidArgumentException('Sender tags for channel must be set.');
                 }
 
-                if (!is_subclass_of($class, SenderInterface::class)) {
-                    throw new InvalidArgumentException(sprintf('Service "%s" must implement interface "%s".', $id, SenderInterface::class));
+                if (!is_subclass_of($class, BatchRequestHandlerInterface::class)) {
+                    throw new InvalidArgumentException(sprintf(
+                        'Service "%s" must implement interface "%s".',
+                        $id,
+                        BatchRequestHandlerInterface::class
+                    ));
                 }
 
                 foreach ($cfgInstances as $cfgName => $config) {
@@ -168,7 +172,7 @@ class DeliverymanExtension extends Extension implements ExtensionInterface
                     $definition->setArgument(1, new Reference(self::SVC_CFG_MANAGER_PREFIX . $cfgName));
                     $definition->setArgument(2, new Reference(self::SVC_VALIDATOR_PREFIX . $cfgName));
 
-                    $container->setDefinition(self::SVC_SENDER_PREFIX . $tag['channel'] . '.' . $cfgName, $definition);
+                    $container->setDefinition(self::SVC_HANDLER_PREFIX . $tag['channel'] . '.' . $cfgName, $definition);
                 }
             }
         }

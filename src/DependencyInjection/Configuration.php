@@ -36,6 +36,26 @@ class Configuration implements ConfigurationInterface
 
         $nodeBuilder->end();
 
+//        $defaultInst = $this->addLibraryInstanceNode();
+//
+//        $nodeBuilder->arrayNode('instances')
+//            ->info('List of supported of configurations for library.')
+////            ->variablePrototype()->end()
+//                ->requiresAtLeastOneElement()
+//                ->addDefaultsIfNotSet()
+//                ->ignoreExtraKeys()
+////                ->defaultValue($defaultInst->)
+//                ->addDefaultChildrenIfNoneSet($this->addLibraryInstanceNode())
+//                ->children()
+//                    ->append($defaultInst)
+//                ->end()
+//                ->arrayPrototype()
+//                ->end()
+////                ->append($defaultInst)
+//        ->end();
+
+        $nodeBuilder->end();
+
         return $treeBuilder;
     }
 

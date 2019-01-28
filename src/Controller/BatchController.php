@@ -4,8 +4,9 @@ namespace DeliverymanBundle\Controller;
 
 use Deliveryman\Channel\HttpGraphChannel;
 use Deliveryman\Entity\BatchRequest;
+use Deliveryman\Entity\BatchResponse;
 use Deliveryman\Normalizer\HttpGraphChannelNormalizer;
-use Deliveryman\Service\SenderInterface;
+use Deliveryman\Service\BatchRequestHandlerInterface;
 use DeliverymanBundle\EventListener\AfterSendEvent;
 use DeliverymanBundle\EventListener\BeforeSendEvent;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -13,6 +14,10 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Handler\HandlersLocator;
+use Symfony\Component\Messenger\MessageBus;
+use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 /**
@@ -71,9 +76,29 @@ class BatchController implements ContainerAwareInterface
         $dispatcher->dispatch(BeforeSendEvent::NAME, $beforeEvent);
         $batchRequest = $beforeEvent->getBatchRequest();
 
-        /** @var SenderInterface $sender */
-        $sender = $this->container->get('deliveryman.sender.' . $channel . '.' . $this->getConfigName());
-        $batchResponse = $sender->send($batchRequest);
+        /** @var BatchRequestHandlerInterface $handler */
+        $handler = $this->container->get('deliveryman.handler.' . $channel . '.' . $this->getConfigName());
+//        $batchResponse = $handler->send($batchRequest);
+
+
+        ///
+
+        $bus = new MessageBus([
+            new HandleMessageMiddleware(new HandlersLocator([
+                BatchRequest::class => [$this->getConfigName() => $handler],
+            ])),
+        ]);
+
+        $dispatchedMessage = $bus->dispatch($batchRequest);
+
+        /** @var HandledStamp $handledStamp */
+        $handledStamp = $dispatchedMessage->last(HandledStamp::class);
+
+        /** @var BatchResponse $batchResponse */
+        $batchResponse = $handledStamp->getResult();
+
+        ///
+
 
         $afterEvent = new AfterSendEvent($channel, $batchResponse);
         $dispatcher->dispatch(AfterSendEvent::NAME, $afterEvent);
