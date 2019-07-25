@@ -18,9 +18,12 @@ class ConfigurationTest extends TestCase
         $expected = [
             'instances' => [
                 'default' => [
-                    'domains' => [],
                     'channels' => [
                         'http_graph' => [
+                            'domains' => [
+                                'localhost',
+                                '127.0.0.1',
+                            ],
                             'request_options' => [
                                 'allow_redirects' => false,
                                 'connect_timeout' => 10,

@@ -1,4 +1,1 @@
-deliveryman:
-    instances:
-        default:
-            domains: [localhost]
+deliveryman: ~

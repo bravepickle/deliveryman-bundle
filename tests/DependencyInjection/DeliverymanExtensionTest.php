@@ -45,7 +45,7 @@ class DeliverymanExtensionTest extends TestCase
     public function testLoad()
     {
         $container = $this->getContainer([
-            ['instances' => ['default' => ['domains' => ['localhost']]]]
+//            ['instances' => ['default' => ['domains' => ['localhost']]]]
         ]);
 
         $this->assertTrue($container->has('deliveryman.handler.http_graph.default'));
@@ -84,7 +84,7 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.channel');
 
         $this->getContainer([
-            ['instances' => ['default' => ['domains' => ['localhost']]]]
+//            ['instances' => ['default' => ['domains' => ['localhost']]]]
         ], [$definition]);
     }
 
@@ -99,7 +99,7 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.channel', ['channel' => 'http_graph']);
 
         $this->getContainer([
-            ['instances' => ['default' => ['domains' => ['localhost']]]]
+//            ['instances' => ['default' => ['domains' => ['localhost']]]]
         ], ['badChannel' => $definition]);
     }
 
@@ -114,7 +114,7 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.channel_normalizer');
 
         $this->getContainer([
-            ['instances' => ['default' => ['domains' => ['localhost']]]]
+//            ['instances' => ['default' => ['domains' => ['localhost']]]]
         ], ['badChannelNormalizer' => $definition]);
     }
 
@@ -129,7 +129,7 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.handler');
 
         $this->getContainer([
-            ['instances' => ['default' => ['domains' => ['localhost']]]]
+//            ['instances' => ['default' => ['domains' => ['localhost']]]]
         ], ['badInstance' => $definition]);
     }
 
@@ -144,7 +144,7 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.handler', ['channel' => 'http_graph']);
 
         $this->getContainer([
-            ['instances' => ['default' => ['domains' => ['localhost']]]]
+//            ['instances' => ['default' => ['domains' => ['localhost']]]]
         ], ['badSender' => $definition]);
     }
 
