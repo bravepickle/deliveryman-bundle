@@ -2,6 +2,7 @@
     "name": "bravepickle/deliveryman-bundle",
     "description": "Symfony bundle for Deliveryman library.",
     "type": "symfony-bundle",
+    "keywords": ["mashup pattern", "whole-part", "aggregation", "composite", "deliveryman", "bundle"],
     "require": {
         "php": ">=7.1",
         "symfony/config": "^4.1",
