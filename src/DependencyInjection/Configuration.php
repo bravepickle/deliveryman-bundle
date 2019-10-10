@@ -6,10 +6,9 @@
 
 namespace DeliverymanBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use DeliverymanBundle\Contract\BatchInstanceInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Deliveryman\DependencyInjection\Configuration as LibConfiguration;
 
 class Configuration implements ConfigurationInterface
 {
@@ -28,47 +27,37 @@ class Configuration implements ConfigurationInterface
 
         $nodeBuilder->arrayNode('instances')
             ->info('List of supported of configuration for library.')
-            ->addDefaultsIfNotSet()
-            ->children()
-                ->append($this->addLibraryInstanceNode())
+            ->useAttributeAsKey('name')
+            ->arrayPrototype()
+                ->children()
+                    ->scalarNode('type')
+                        ->isRequired()
+                        ->cannotBeEmpty()
+                        ->treatNullLike('default')
+                        ->example('default')
+                        ->info('Type of batch instance to use. When using custom service put type: service.')
+                    ->end()
+
+                    ->arrayNode('config')
+                        ->variablePrototype()->end()
+                        ->info('Configuration settings for this instance.')
+                    ->end()
+
+                    ->scalarNode('service')
+                        ->defaultNull()
+                        ->example('App\\Service\\MyCustomService')
+                        ->info(sprintf(
+                            'Your local service for handling batches. Must implement %s interface.',
+                            BatchInstanceInterface::class
+                        ))
+                    ->end()
+                ->end()
             ->end()
         ->end();
 
         $nodeBuilder->end();
 
-//        $defaultInst = $this->addLibraryInstanceNode();
-//
-//        $nodeBuilder->arrayNode('instances')
-//            ->info('List of supported of configurations for library.')
-////            ->variablePrototype()->end()
-//                ->requiresAtLeastOneElement()
-//                ->addDefaultsIfNotSet()
-//                ->ignoreExtraKeys()
-////                ->defaultValue($defaultInst->)
-//                ->addDefaultChildrenIfNoneSet($this->addLibraryInstanceNode())
-//                ->children()
-//                    ->append($defaultInst)
-//                ->end()
-//                ->arrayPrototype()
-//                ->end()
-////                ->append($defaultInst)
-//        ->end();
-
-        $nodeBuilder->end();
-
         return $treeBuilder;
-    }
-
-    /**
-     * @return \Symfony\Component\Config\Definition\Builder\NodeBuilder|NodeDefinition
-     */
-    protected function addLibraryInstanceNode()
-    {
-        $nodeName = 'default';
-        $config = new LibConfiguration();
-        $config->setName($nodeName);
-
-        return $config->buildNodesTree(new TreeBuilder($nodeName));
     }
 
 }

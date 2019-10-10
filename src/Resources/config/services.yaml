@@ -17,7 +17,6 @@ services:
         class: Deliveryman\Channel\HttpGraphChannel
         abstract: true
         public: true
-        autowire: true
         arguments:
             $configManager: '@deliveryman.config_manager.abstract'
         tags:
@@ -27,13 +26,13 @@ services:
         class: Deliveryman\Service\BatchRequestValidator
         abstract: true
         public: false
-        autowire: true
+#        autowire: true
         arguments:
             $configManager: '@deliveryman.config_manager.abstract'
 
     deliveryman.normalizer:
         class: Deliveryman\Normalizer\BatchRequestNormalizer
-        autowire: true
+#        autowire: true
         autoconfigure: true
         public: true
         tags: [serializer.normalizer]
@@ -45,9 +44,9 @@ services:
     deliveryman.handler.http_graph.abstract:
         class: Deliveryman\Service\BatchRequestHandler
         abstract: true
-        autowire: true
+#        autowire: true
         arguments:
-            $channel: '@deliveryman.http_graph.abstract'
+#            $channel: '@deliveryman.http_graph.abstract'
             $configManager: '@deliveryman.config_manager.abstract'
             $batchRequestValidator: '@deliveryman.validator.abstract'
         tags:
@@ -60,7 +59,7 @@ services:
     deliveryman.channel_normalizer.http_graph:
         parent: deliveryman.channel_normalizer.abstract
         class: Deliveryman\Normalizer\HttpGraphChannelNormalizer
-        autowire: true
+#        autowire: true
         arguments: ['@serializer']
         tags:
             - {name: 'deliveryman.channel_normalizer'}
