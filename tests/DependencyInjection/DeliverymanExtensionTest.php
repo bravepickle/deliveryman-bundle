@@ -12,9 +12,11 @@ use Deliveryman\Normalizer\BatchRequestNormalizer;
 use Deliveryman\Service\BatchRequestHandler;
 use Deliveryman\Service\BatchRequestHandlerInterface;
 use DeliverymanBundle\DependencyInjection\DeliverymanExtension;
+use DeliverymanBundleTest\Service\CustomInstanceService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\DependencyInjection\SerializerPass;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Serializer;
@@ -42,26 +44,117 @@ class DeliverymanExtensionTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testLoad()
+    public function testDefaultLoad()
     {
         $container = $this->getContainer([
-//            ['instances' => ['default' => ['domains' => ['localhost']]]]
+            [
+                'instances' => [
+                    'custom' => [
+                        'type' => 'default',
+                    ],
+                ],
+            ]
         ]);
 
-        $this->assertTrue($container->has('deliveryman.handler.http_graph.default'));
-        $this->assertInstanceOf(BatchRequestHandler::class, $container->get('deliveryman.handler.http_graph.default'));
-        $this->assertInstanceOf(BatchRequestHandlerInterface::class, $container->get('deliveryman.handler.http_graph.default'));
+        $this->assertTrue($container->has('deliveryman.handler.http_graph.custom'));
+        $this->assertInstanceOf(BatchRequestHandler::class, $container->get('deliveryman.handler.http_graph.custom'));
+        $this->assertInstanceOf(BatchRequestHandlerInterface::class, $container->get('deliveryman.handler.http_graph.custom'));
 
-
-        $this->assertTrue($container->has('deliveryman.channel.http_graph.default'));
-        $this->assertInstanceOf(HttpGraphChannel::class, $container->get('deliveryman.channel.http_graph.default'));
-        $this->assertInstanceOf(ChannelInterface::class, $container->get('deliveryman.channel.http_graph.default'));
-        $this->assertTrue($container->hasDefinition('deliveryman.channel.http_graph.default'));
+        $this->assertTrue($container->has('deliveryman.channel.http_graph.custom'));
+        $this->assertInstanceOf(HttpGraphChannel::class, $container->get('deliveryman.channel.http_graph.custom'));
+        $this->assertInstanceOf(ChannelInterface::class, $container->get('deliveryman.channel.http_graph.custom'));
+        $this->assertTrue($container->hasDefinition('deliveryman.channel.http_graph.custom'));
 
         $this->assertTrue($container->has('deliveryman.normalizer'));
+
         /** @var BatchRequestNormalizer $normalizer */
         $normalizer = $container->get('deliveryman.normalizer');
         $this->assertInstanceOf(BatchRequestNormalizer::class, $normalizer);
+    }
+
+    public function loadFails()
+    {
+        return [
+            [
+                [ // instances
+                    'svc' => [
+                        'type' => 'service',
+                    ],
+                ],
+                [],
+                InvalidArgumentException::class,
+                'Service ID is not defined for instance: svc'
+            ],
+            [
+                [ // instances
+                    'svc' => [
+                        'type' => 'service',
+                        'service' => null,
+                    ],
+                ],
+                [],
+                InvalidArgumentException::class,
+                'Service ID is not defined for instance: svc'
+            ],
+            [
+                [ // instances
+                    'svc' => [
+                        'type' => 'service',
+                        'service' => 'UnknownClassName',
+                    ],
+                ],
+                [],
+                InvalidArgumentException::class,
+                'Cannot bootstrap unknown service: UnknownClassName'
+            ],
+            [
+                [ // instances
+                    'svc' => [
+                        'type' => 'service',
+                        'service' => 'random_svc',
+                    ],
+                ],
+                ['random_svc' => new Definition(\Exception::class)],
+                InvalidArgumentException::class,
+                'Class "Exception" must implement interface of "DeliverymanBundle\DependencyInjection\InstanceBootstrap\ServiceBootstrapperInterface" to instantiate batch: svc'
+            ],
+        ];
+    }
+
+    /**
+     * @param array $instances
+     * @param Definition[] $definitions
+     * @param $exceptionClass
+     * @param $exceptionMessage
+     * @throws \Exception
+     * @dataProvider loadFails
+     */
+    public function testLoadFail(array $instances, array $definitions, $exceptionClass, $exceptionMessage)
+    {
+        $this->expectException($exceptionClass);
+        $this->expectExceptionMessage($exceptionMessage);
+        $this->getContainer([['instances' => $instances]], $definitions);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testServiceLoad()
+    {
+        $container = $this->getContainer([
+            [
+                'instances' => [
+                    'custom_svc' => [
+                        'type' => 'service',
+                        'service' => CustomInstanceService::class,
+                    ],
+                ],
+            ]
+        ], [CustomInstanceService::class => (new Definition(CustomInstanceService::class))->setPublic(true)]);
+
+        $this->assertTrue($container->has(CustomInstanceService::class));
+        $this->assertTrue($container->has('deliveryman.service.custom_svc'));
+        $this->assertNotEmpty($container->getAlias('deliveryman.service.custom_svc'));
     }
 
     /**
@@ -84,7 +177,13 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.channel');
 
         $this->getContainer([
-//            ['instances' => ['default' => ['domains' => ['localhost']]]]
+            [
+                'instances' => [
+                    'custom' => [
+                        'type' => 'default',
+                    ],
+                ],
+            ]
         ], [$definition]);
     }
 
@@ -99,7 +198,13 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.channel', ['channel' => 'http_graph']);
 
         $this->getContainer([
-//            ['instances' => ['default' => ['domains' => ['localhost']]]]
+            [
+                'instances' => [
+                    'custom' => [
+                        'type' => 'default',
+                    ],
+                ],
+            ]
         ], ['badChannel' => $definition]);
     }
 
@@ -114,7 +219,13 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.channel_normalizer');
 
         $this->getContainer([
-//            ['instances' => ['default' => ['domains' => ['localhost']]]]
+            [
+                'instances' => [
+                    'custom' => [
+                        'type' => 'default',
+                    ],
+                ],
+            ]
         ], ['badChannelNormalizer' => $definition]);
     }
 
@@ -129,7 +240,13 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.handler');
 
         $this->getContainer([
-//            ['instances' => ['default' => ['domains' => ['localhost']]]]
+            [
+                'instances' => [
+                    'custom' => [
+                        'type' => 'default',
+                    ],
+                ],
+            ]
         ], ['badInstance' => $definition]);
     }
 
@@ -144,7 +261,13 @@ class DeliverymanExtensionTest extends TestCase
         $definition->addTag('deliveryman.handler', ['channel' => 'http_graph']);
 
         $this->getContainer([
-//            ['instances' => ['default' => ['domains' => ['localhost']]]]
+            [
+                'instances' => [
+                    'custom' => [
+                        'type' => 'default',
+                    ],
+                ],
+            ]
         ], ['badSender' => $definition]);
     }
 
