@@ -23,11 +23,20 @@ class DeliverymanBundleTest extends TestCase
      */
     public function testBuild()
     {
+        $containerBuilder = new ContainerBuilder();
+
         $bundle = new DeliverymanBundle();
         $extension = $bundle->getContainerExtension();
         $this->assertInstanceOf(DeliverymanExtension::class, $extension);
 
-        $containerBuilder = new ContainerBuilder();
+        $extension->load([[
+            'instances' => [
+                'default' => [
+                    'type' => 'default',
+                ],
+            ],
+        ]], $containerBuilder);
+
         $bundle->build($containerBuilder);
         $containerBuilder->loadFromExtension('deliveryman');
 

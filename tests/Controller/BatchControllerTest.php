@@ -96,9 +96,18 @@ class BatchControllerTest extends TestCase
      */
     protected function getContainer()
     {
-        $bundle = new DeliverymanBundle();
-
         $containerBuilder = new ContainerBuilder();
+        $bundle = new DeliverymanBundle();
+        $extension = $bundle->getContainerExtension();
+
+        $extension->load([[
+            'instances' => [
+                'default' => [
+                    'type' => 'default',
+                ],
+            ],
+        ]], $containerBuilder);
+
         $bundle->build($containerBuilder);
         $containerBuilder->loadFromExtension('deliveryman');
 
