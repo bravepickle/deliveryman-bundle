@@ -11,6 +11,7 @@ use DeliverymanBundle\EventListener\AfterSendEvent;
 use DeliverymanBundle\EventListener\BeforeSendEvent;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,10 +55,8 @@ class BatchController implements ContainerAwareInterface
 
     /**
      * @param Request $request
-     * @param EventDispatcherInterface $dispatcher
+     * @param EventDispatcherInterface|EventDispatcher $dispatcher
      * @return Response
-     * @throws \Deliveryman\Exception\SendingException
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function httpGraph(
         Request $request,
@@ -78,10 +77,6 @@ class BatchController implements ContainerAwareInterface
 
         /** @var BatchRequestHandlerInterface $handler */
         $handler = $this->container->get('deliveryman.handler.' . $channel . '.' . $this->getConfigName());
-//        $batchResponse = $handler->send($batchRequest);
-
-
-        ///
 
         $bus = new MessageBus([
             new HandleMessageMiddleware(new HandlersLocator([
@@ -96,9 +91,6 @@ class BatchController implements ContainerAwareInterface
 
         /** @var BatchResponse $batchResponse */
         $batchResponse = $handledStamp->getResult();
-
-        ///
-
 
         $afterEvent = new AfterSendEvent($channel, $batchResponse);
         $dispatcher->dispatch(AfterSendEvent::NAME, $afterEvent);
